@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
-from to_postgres import aphorism_by_id, list_id, list_id_all
-
+# from to_postgres import aphorism_by_id, list_id, list_id_all
+from to_sqlite import aphorism_by_id, list_id, list_id_all
 
 class listing():
     # listing_id = {}
@@ -47,7 +47,8 @@ class listing():
         if _field == 'meta' or _field == 'autor':
             _LIST = list_id(field=_field, search=_search)
         elif _field == 'content':
-            _LIST = list_id(field='"content"', search=_search)
+            _LIST = list_id(field='aphorism', search=_search) # for sqlite
+            # _LIST = list_id(field='"content"', search=_search) # for postgres
         elif _field == 'all':
             _LIST = list_id_all(data_search=_search)
         else:
