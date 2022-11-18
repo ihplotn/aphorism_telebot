@@ -44,7 +44,9 @@ class listing():
     def create_id_list(self,user_id):
         _field = self.field[user_id]
         _search = self.data_search[user_id]
-        if _field == 'meta' or _field == 'autor':
+        if _field == 'meta':
+            _LIST = list_id(field=_field, search=str(_search).upper())
+        elif _field == 'autor':
             _LIST = list_id(field=_field, search=_search)
         elif _field == 'content':
             _LIST = list_id(field='aphorism', search=_search) # for sqlite
@@ -54,4 +56,9 @@ class listing():
         else:
             _LIST = list_id()
         self.listing_id[user_id] = _LIST
+
+    def restart(self):
+        self.field.clear()
+        self.data_search.clear()
+        self.listing_id.clear()
 

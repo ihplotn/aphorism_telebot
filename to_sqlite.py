@@ -4,7 +4,7 @@ import sqlite3
 from sqlite3 import Error
 # from config import *
 
-DATABASE ='ophorim.db'
+DATABASE ='aphorism.db'
 table = 'aphorisms'
 
 def execute_read_query(query):
@@ -50,7 +50,7 @@ def list_id(field='meta', search=''):
 def list_id_all(data_search=''):
     query = f'''select id
                 from {table} a
-                where meta like '%{data_search}%' or
+                where meta like '%{data_search.upper()}%' or
                  autor like '%{data_search}%' or
                  aphorism like '%{data_search}%';'''
     _list = execute_read_query(query)

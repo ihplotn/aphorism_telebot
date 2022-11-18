@@ -29,8 +29,6 @@ def conf_logger():
     file_hander.setLevel(logging.INFO)
 
 
-
-
 # TODO Старт добавить описание discription
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -51,7 +49,6 @@ def start(message):
     btn_help = types.KeyboardButton('/help')
     markup.add(btn_aphorism, btn_search, btn_next, btn_help)
     bot.send_message(message.chat.id, content, parse_mode='html', reply_markup=markup)
-    pass
 
 
 # TODO Помощь уточнить описание
@@ -61,7 +58,7 @@ def help(message):
               f'Для взаиммодействия с ботом используйте следующие команды: \n' \
               f'/aphorism - показать случайный афоризм (поиск сбрасывается)\n' \
               f'/search - поиск по автору, теме или по тексту афоризма\n' \
-              f'/next - показать следующий афоризм из выброных поиском\n'
+              f'/next - показать следующий афоризм из выбраных поиском\n'
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=4)
     btn_aphorism = types.KeyboardButton('/aphorism')
@@ -70,7 +67,6 @@ def help(message):
     btn_help = types.KeyboardButton('/help')
     markup.add(btn_aphorism, btn_search, btn_next, btn_help)
     bot.send_message(message.chat.id, content, parse_mode='html', reply_markup=markup)
-    pass
 
 
 # Блок SEARСH +
@@ -114,11 +110,25 @@ def next_aphorism(message):
         _aphorism = ls.print_aphorism_by_id(_id,user_id)
         # print(message)
         log.info(f"{str(message.from_user.id)},{str(_id)},{ls.field[user_id]},{ls.data_search[user_id]}")
-        content = f"{_aphorism['info']}\n <b>--{_aphorism['meta']}--</b>\n{_aphorism['content']}\n\t <i>" \
+        content = f"Осталось {_aphorism['info']} афоризмов\n <b>--{_aphorism['meta']}--</b>\n{_aphorism['content']}\n\t <i>" \
                   f"~{_aphorism['autor']}</i>"
+
     else:
-        content = f'<b>По Вашему запросу ничего не найдено</b>'
-    bot.send_message(message.chat.id, content, parse_mode='html')
+        if ls.field[user_id] == '' or ls.data_search[user_id] == '':
+            content = f'<b>Все афоризмы</b>'
+            aphorism_rand(message)
+        else:
+            content = f'<b>По Вашему запросу ничего не найдено</b>'
+            ls.field[user_id] = ''
+            ls.data_search[user_id] = ''
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=4)
+    btn_aphorism = types.KeyboardButton('/aphorism')
+    btn_search = types.KeyboardButton('/search')
+    btn_next = types.KeyboardButton('/next')
+    btn_help = types.KeyboardButton('/help')
+    markup.add(btn_aphorism, btn_search, btn_next, btn_help)
+    bot.send_message(message.chat.id, content, parse_mode='html', reply_markup=markup)
 
 
 # Блок APHORISM брос всей поисковых запросов, вывод случайного id() из полного списка
@@ -137,7 +147,7 @@ def aphorism_rand(message):
 def any_mess(message):
     user_id = str(message.from_user.id)
     ls.new_user(user_id)
-    if ls.field[user_id] and message.text:
+    if message.text:
         _text = str(message.text)
         _text.replace('"', '')
         _text.replace("'", '')
@@ -155,9 +165,10 @@ def telegram_polling():
         log.debug('Telebot запущен.\n Чтобы остановить скрипт нажмите Ctrl + C')
         bot.polling(none_stop=True, skip_pending=True)
     except Exception:
-        log.exception('ERROR polling')
+        # log.exception('ERROR polling')
         bot.stop_polling()
-        log.debug('Презапуск Telebotа запущен.')
+        log.debug('ERROR polling. Презапуск Telebotа.')
+        ls.restart()
         time.sleep(30)
         telegram_polling()
 
