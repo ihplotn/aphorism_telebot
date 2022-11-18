@@ -28,6 +28,14 @@ def conf_logger():
     log.addHandler(file_hander)
     file_hander.setLevel(logging.INFO)
 
+def markup():
+    _markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=4)
+    btn_aphorism = types.KeyboardButton('/aphorism')
+    btn_search = types.KeyboardButton('/search')
+    btn_next = types.KeyboardButton('/next')
+    btn_help = types.KeyboardButton('/help')
+    _markup.add(btn_aphorism, btn_search, btn_next, btn_help)
+    return _markup
 
 # TODO Старт добавить описание discription
 @bot.message_handler(commands=['start'])
@@ -42,13 +50,7 @@ def start(message):
               f'/next - показать следующий афоризм из поиска\n' \
               f'/help - описание работы бота\n'
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=4)
-    btn_aphorism = types.KeyboardButton('/aphorism')
-    btn_search = types.KeyboardButton('/search')
-    btn_next = types.KeyboardButton('/next')
-    btn_help = types.KeyboardButton('/help')
-    markup.add(btn_aphorism, btn_search, btn_next, btn_help)
-    bot.send_message(message.chat.id, content, parse_mode='html', reply_markup=markup)
+    bot.send_message(message.chat.id, content, parse_mode='html', reply_markup=markup())
 
 
 # TODO Помощь уточнить описание
@@ -60,13 +62,7 @@ def help(message):
               f'/search - поиск по автору, теме или по тексту афоризма\n' \
               f'/next - показать следующий афоризм из выбраных поиском\n'
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=4)
-    btn_aphorism = types.KeyboardButton('/aphorism')
-    btn_search = types.KeyboardButton('/search')
-    btn_next = types.KeyboardButton('/next')
-    btn_help = types.KeyboardButton('/help')
-    markup.add(btn_aphorism, btn_search, btn_next, btn_help)
-    bot.send_message(message.chat.id, content, parse_mode='html', reply_markup=markup)
+    bot.send_message(message.chat.id, content, parse_mode='html', reply_markup=markup())
 
 
 # Блок SEARСH +
@@ -114,6 +110,7 @@ def next_aphorism(message):
                   f"~{_aphorism['autor']}</i>"
 
     else:
+        log.info(f"{str(message.from_user.id)},'None',{ls.field[user_id]},{ls.data_search[user_id]}")
         if ls.field[user_id] == '' or ls.data_search[user_id] == '':
             content = f'<b>Все афоризмы</b>'
             aphorism_rand(message)
@@ -122,13 +119,7 @@ def next_aphorism(message):
             ls.field[user_id] = ''
             ls.data_search[user_id] = ''
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=4)
-    btn_aphorism = types.KeyboardButton('/aphorism')
-    btn_search = types.KeyboardButton('/search')
-    btn_next = types.KeyboardButton('/next')
-    btn_help = types.KeyboardButton('/help')
-    markup.add(btn_aphorism, btn_search, btn_next, btn_help)
-    bot.send_message(message.chat.id, content, parse_mode='html', reply_markup=markup)
+    bot.send_message(message.chat.id, content, parse_mode='html', reply_markup=markup())
 
 
 # Блок APHORISM брос всей поисковых запросов, вывод случайного id() из полного списка
