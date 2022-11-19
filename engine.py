@@ -4,34 +4,59 @@ import random
 from to_sqlite import aphorism_by_id, list_id, list_id_all
 
 class listing():
-    # listing_id = {}
+
     def __init__(self):
-        self.field = {}
-        self.data_search = {}
-        self.listing_id = {}
+        self.users = {
+            '0000':{
+                'listing_id': [154,451],
+                'field' : '',
+                'search_data' : '',}
+            }
 
-    def new_user(self, user_id):
-        if not user_id in self.field:
-            self.field[user_id] = ''
-        if not user_id in self.data_search:
-            self.data_search[user_id] = ''
-        if not user_id in self.listing_id:
-            self.listing_id[user_id] = ''
 
+    def new_users(self, user_id, new_list=False):
+        if not user_id in self.users:
+            self.users[user_id] = {
+                'listing_id': '',
+                'field' : '',
+                'search_data' : '',}
+        elif new_list:
+            self.users[user_id]['listing_id'] = ''
+            self.users[user_id]['field'] = ''
+            self.users[user_id]['search_data'] = ''
+            self.create_id_list(user_id)
+
+    def next_aphorism_content(self, user_id):
+        if self.users[user_id]['listing_id']:
+            _id = self.random_id(user_id)
+            _aphorism = self.print_aphorism_by_id(_id, user_id)
+            if not self.users[user_id]['search_data']:
+                _info = f"Всего 5000 афоризмов и цитат"
+            else:
+                _info = f"По запросу {_aphorism['info']} афоризмов"
+            log_info = f"{user_id},{str(_id)},{self.users[user_id]['field']},{self.users[user_id]['search_data']}"
+            content = f"{_info}\n <b>--{_aphorism['meta']}--</b>\n{_aphorism['content']}\n\t <i>" \
+                      f"~{_aphorism['autor']}</i>"
+
+        else:
+            log_info = f"{user_id},None,{self.users[user_id]['field']},{self.users[user_id]['search_data']}"
+            content = f'<b>По Вашему запросу ничего не найдено</b>'
+            self.new_users(user_id, new_list=True)
+        return (content, log_info)
 
 # Выбрать Id
     def random_id(self, user_id):
         result = ''
-        if self.listing_id[user_id]:
-            result = random.choice(self.listing_id[user_id])
-            self.listing_id[user_id].remove(result)
+        if self.users[user_id]['listing_id']:
+            result = random.choice(self.users[user_id]['listing_id'])
+            self.users[user_id]['listing_id'].remove(result)
         return (result)
 
 
     # Подготовка полей для печати
     def print_aphorism_by_id(self, Id, user_id):
         _aphorism = aphorism_by_id(Id)
-        text_info = len(self.listing_id[user_id])
+        text_info = len(self.users[user_id]['listing_id'])
         content = {
                     'info':text_info,
                     'meta':_aphorism[1],
@@ -41,24 +66,31 @@ class listing():
         return content
 
     # Поиск по базе и вывод list_id
-    def create_id_list(self,user_id):
-        _field = self.field[user_id]
-        _search = self.data_search[user_id]
+    def create_id_list(self, user_id):
+        print(self.users[user_id]['search_data'])
+        if not self.users[user_id]['search_data']:
+            self.users[user_id]['listing_id'] = list_id()
+            return
+        _text = self.users[user_id]['search_data']
+        if _text:
+            _text.replace('"', '')
+            _text.replace("'", '')
+
+        _field = self.users[user_id]['field']
         if _field == 'meta':
-            _LIST = list_id(field=_field, search=str(_search).upper())
+            _LIST = list_id(field=_field, search=str(_text).upper())
         elif _field == 'autor':
-            _LIST = list_id(field=_field, search=_search)
+            _LIST = list_id(field=_field, search=_text)
         elif _field == 'content':
-            _LIST = list_id(field='aphorism', search=_search) # for sqlite
+            _LIST = list_id(field='aphorism', search=_text) # for sqlite
             # _LIST = list_id(field='"content"', search=_search) # for postgres
         elif _field == 'all':
-            _LIST = list_id_all(data_search=_search)
+            _LIST = list_id_all(data_search=_text)
         else:
             _LIST = list_id()
-        self.listing_id[user_id] = _LIST
+        self.users[user_id]['listing_id'] = _LIST
 
     def restart(self):
-        self.field.clear()
-        self.data_search.clear()
-        self.listing_id.clear()
+        self.users.clear()
+
 

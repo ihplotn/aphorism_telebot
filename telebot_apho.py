@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import logging
 import telebot
-from telebot import types
+from telebot import types, apihelper
 from config import tkn
 from engine import listing
 import time
 from datetime import date
 
+apihelper.ENABLE_MIDDLEWARE = True
 
 log = logging.getLogger('bot')
 
@@ -27,6 +28,10 @@ def conf_logger():
     file_hander.setFormatter(logging.Formatter(fmt="%(asctime)s,%(levelname)s,%(message)s",  datefmt='%Y-%m-%d %H:%M:%S'))
     log.addHandler(file_hander)
     file_hander.setLevel(logging.INFO)
+
+@bot.middleware_handler(update_types=['message', 'callback_query'])
+def set_session(bot_instance, message):
+    ls.new_users(str(message.from_user.id))
 
 def markup():
     _markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=4)
@@ -91,7 +96,7 @@ def iq_callback(query):
     else:
         FIELD = 'all'
         _field = 'по всем категориям'
-    ls.field[str(query.from_user.id)] = FIELD
+    ls.users[str(query.from_user.id)]['field'] = FIELD
     text_field = f'Введите слово для поиска {_field}:'
     bot.send_message(query.message.chat.id, text_field, parse_mode='html')
 
@@ -100,36 +105,16 @@ def iq_callback(query):
 @bot.message_handler(commands=['next'])
 def next_aphorism(message):
     user_id = str(message.from_user.id)
-    ls.new_user(user_id=user_id)
-    if ls.listing_id[user_id]:
-        _id = ls.random_id(user_id)
-        _aphorism = ls.print_aphorism_by_id(_id,user_id)
-        # print(message)
-        log.info(f"{str(message.from_user.id)},{str(_id)},{ls.field[user_id]},{ls.data_search[user_id]}")
-        content = f"Осталось {_aphorism['info']} афоризмов\n <b>--{_aphorism['meta']}--</b>\n{_aphorism['content']}\n\t <i>" \
-                  f"~{_aphorism['autor']}</i>"
-
-    else:
-        log.info(f"{str(message.from_user.id)},'None',{ls.field[user_id]},{ls.data_search[user_id]}")
-        if ls.field[user_id] == '' or ls.data_search[user_id] == '':
-            content = f'<b>Все афоризмы</b>'
-            aphorism_rand(message)
-        else:
-            content = f'<b>По Вашему запросу ничего не найдено</b>'
-            ls.field[user_id] = ''
-            ls.data_search[user_id] = ''
-
-    bot.send_message(message.chat.id, content, parse_mode='html', reply_markup=markup())
+    content = ls.next_aphorism_content(user_id)
+    log.info(f"{content[1]}")
+    bot.send_message(message.chat.id, content[0], parse_mode='html', reply_markup=markup())
 
 
 # Блок APHORISM брос всей поисковых запросов, вывод случайного id() из полного списка
 @bot.message_handler(commands=['aphorism'])
 def aphorism_rand(message):
     user_id = str(message.from_user.id)
-    ls.new_user(user_id)
-    ls.field[user_id] = ''
-    ls.data_search[user_id] = ''
-    ls.create_id_list(user_id)
+    ls.new_users(user_id, new_list=True)
     next_aphorism(message)
 
 
@@ -137,18 +122,10 @@ def aphorism_rand(message):
 @bot.message_handler()
 def any_mess(message):
     user_id = str(message.from_user.id)
-    ls.new_user(user_id)
-    if message.text:
-        _text = str(message.text)
-        _text.replace('"', '')
-        _text.replace("'", '')
-        ls.data_search[user_id] = _text
-        ls.create_id_list(user_id)
-        next_aphorism(message)
-    elif ls.listing_id[user_id]:
-        next_aphorism(message)
-    else:
-        aphorism_rand(message)
+    ls.users[user_id]['search_data'] = str(message.text)
+    ls.create_id_list(user_id)
+    next_aphorism(message)
+
 
 
 def telegram_polling():

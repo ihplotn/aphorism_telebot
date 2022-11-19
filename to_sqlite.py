@@ -41,7 +41,8 @@ def list_id(field='meta', search=''):
     if field in ['meta', 'autor','aphorism']:
         query = f'''select id
                     from {table} a
-                    where {field} like '%{search}%' ;'''
+                    where {field} like '%{search}%' 
+                     or {field} like '%{search.lower()}%';'''
         _list = execute_read_query(query)
         id_list = [_id[0] for _id in _list]
         return id_list
@@ -51,8 +52,8 @@ def list_id_all(data_search=''):
     query = f'''select id
                 from {table} a
                 where meta like '%{data_search.upper()}%' or
-                 autor like '%{data_search}%' or
-                 aphorism like '%{data_search}%';'''
+                 autor like '%{data_search}%' or autor like '%{data_search.lower()}%' or
+                 aphorism like '%{data_search}%' or aphorism like '%{data_search.lower()}%';'''
     _list = execute_read_query(query)
     id_list = [_id[0] for _id in _list]
     return id_list
