@@ -26,6 +26,15 @@ class listing():
             self.users[user_id]['search_data'] = ''
             self.create_id_list(user_id)
 
+    def search_parameters(self,  user_id, field='', search_data=''):
+        if field:
+            self.users[user_id]['field'] = field
+        if search_data:
+            _text = str(search_data)
+            _text = _text.replace('"', '')
+            _text = _text.replace("'", '')
+            self.users[user_id]['search_data'] = _text
+
     def next_aphorism_content(self, user_id):
         if self.users[user_id]['listing_id']:
             _id = self.random_id(user_id)
@@ -67,15 +76,10 @@ class listing():
 
     # Поиск по базе и вывод list_id
     def create_id_list(self, user_id):
-        print(self.users[user_id]['search_data'])
         if not self.users[user_id]['search_data']:
             self.users[user_id]['listing_id'] = list_id()
             return
         _text = self.users[user_id]['search_data']
-        if _text:
-            _text.replace('"', '')
-            _text.replace("'", '')
-
         _field = self.users[user_id]['field']
         if _field == 'meta':
             _LIST = list_id(field=_field, search=str(_text).upper())

@@ -96,7 +96,7 @@ def iq_callback(query):
     else:
         FIELD = 'all'
         _field = 'по всем категориям'
-    ls.users[str(query.from_user.id)]['field'] = FIELD
+    ls.search_parameters(user_id=str(query.from_user.id), field=FIELD)
     text_field = f'Введите слово для поиска {_field}:'
     bot.send_message(query.message.chat.id, text_field, parse_mode='html')
 
@@ -122,7 +122,7 @@ def aphorism_rand(message):
 @bot.message_handler()
 def any_mess(message):
     user_id = str(message.from_user.id)
-    ls.users[user_id]['search_data'] = str(message.text)
+    ls.search_parameters(user_id, search_data=message.text)
     ls.create_id_list(user_id)
     next_aphorism(message)
 
@@ -135,7 +135,7 @@ def telegram_polling():
     except Exception:
         # log.exception('ERROR polling')
         bot.stop_polling()
-        log.debug('ERROR polling. Презапуск Telebotа.')
+        log.debug('ERROR polling. Перезапуск Telebotа.')
         ls.restart()
         time.sleep(30)
         telegram_polling()

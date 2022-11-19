@@ -5,28 +5,26 @@ from engine import listing
 user_id = '0000'
 ls = listing()
 ls.new_users(user_id=user_id)
+print(1, ls.users[user_id]['field'], ls.users[user_id]['search_data'], len(ls.users[user_id]['listing_id'])) # 2
 
 ls.create_id_list(user_id)
-print(ls.users[user_id]['field'], ls.users[user_id]['search_data'], len(ls.users[user_id]['listing_id'])) # 1390
+print(2, ls.users[user_id]['field'], ls.users[user_id]['search_data'], len(ls.users[user_id]['listing_id'])) # 3896
 
-ls.users[user_id]['search_data'] = 'Эйнштейн'
+ls.search_parameters(user_id, search_data='Эйнштейн')
 ls.create_id_list(user_id)
-print(ls.users[user_id]['field'], ls.users[user_id]['search_data'], len(ls.users[user_id]['listing_id'])) #   Эйнштейн 1390
+print(3, ls.users[user_id]['field'], ls.users[user_id]['search_data'], len(ls.users[user_id]['listing_id'])) #   Эйнштейн  3896
 
-
-ls.users[user_id]['field'] ='autor'
+ls.search_parameters(user_id, field='autor')
 ls.create_id_list(user_id)
-print(ls.users[user_id]['field'], ls.users[user_id]['search_data'], len(ls.users[user_id]['listing_id'])) # autor Эйнштейн 221
+print(4, ls.users[user_id]['field'], ls.users[user_id]['search_data'], len(ls.users[user_id]['listing_id'])) # autor Эйнштейн 221
 
-
-ls.users[user_id]['field'] ='all'
+ls.search_parameters(user_id, field='all', search_data="'2")
 ls.create_id_list(user_id)
-print(ls.users[user_id]['field'], ls.users[user_id]['search_data'], len(ls.users[user_id]['listing_id']))# all Эйнштейн 223
+print(5,ls.users[user_id]['field'], ls.users[user_id]['search_data'], len(ls.users[user_id]['listing_id']))# all 2
 
-ls.users[user_id]['search_data'] = 'Слово'
-ls.users[user_id]['field'] ='content'
+ls.search_parameters(user_id, field='content', search_data='люб"овь')
 ls.create_id_list(user_id)
-print(ls.users[user_id]['field'], ls.users[user_id]['search_data'], len(ls.users[user_id]['listing_id'])) # content Слово 21
+print(6, ls.users[user_id]['field'], ls.users[user_id]['search_data'], len(ls.users[user_id]['listing_id'])) # content Слово 21
 
 while ls.users[user_id]['listing_id']:
     Id = ls.random_id(user_id)
