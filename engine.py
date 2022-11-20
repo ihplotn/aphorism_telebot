@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 import random
 # from to_postgres import aphorism_by_id, list_id, list_id_all
-from to_sqlite import aphorism_by_id, list_id, list_id_all
+from to_sqlite import aphorism_by_id, list_id, list_id_all, full_list_id
 
 class listing():
-
+    FULL_LIST = full_list_id()
+    COUNT_ALL =len(FULL_LIST)
     def __init__(self):
         self.users = {
             '0000':{
-                'listing_id': [154,451],
+                'listing_id': [154,4],
                 'field' : '',
                 'search_data' : '',}
             }
@@ -36,13 +37,17 @@ class listing():
             self.users[user_id]['search_data'] = _text
 
     def next_aphorism_content(self, user_id):
-        if self.users[user_id]['listing_id']:
+        if not self.users[user_id]['search_data']:
+            _info = f"Всего {self.COUNT_ALL} афоризмов и цитат"
+            _id = self.random_id()
+            _aphorism = self.print_aphorism_by_id(_id, user_id)
+            log_info = f"{user_id},{str(_id)},{self.users[user_id]['field']},{self.users[user_id]['search_data']}"
+            content = f"{_info}\n <b>--{_aphorism['meta']}--</b>\n{_aphorism['content']}\n\t <i>" \
+                      f"~{_aphorism['autor']}</i>"
+        elif self.users[user_id]['listing_id']:
             _id = self.random_id(user_id)
             _aphorism = self.print_aphorism_by_id(_id, user_id)
-            if not self.users[user_id]['search_data']:
-                _info = f"Всего 5000 афоризмов и цитат"
-            else:
-                _info = f"По запросу {_aphorism['info']} афоризмов"
+            _info = f"По запросу {_aphorism['info']} афоризмов"
             log_info = f"{user_id},{str(_id)},{self.users[user_id]['field']},{self.users[user_id]['search_data']}"
             content = f"{_info}\n <b>--{_aphorism['meta']}--</b>\n{_aphorism['content']}\n\t <i>" \
                       f"~{_aphorism['autor']}</i>"
@@ -51,12 +56,16 @@ class listing():
             log_info = f"{user_id},None,{self.users[user_id]['field']},{self.users[user_id]['search_data']}"
             content = f'<b>По Вашему запросу ничего не найдено</b>'
             self.new_users(user_id, new_list=True)
+
+
         return (content, log_info)
 
 # Выбрать Id
-    def random_id(self, user_id):
+    def random_id(self, user_id=''):
         result = ''
-        if self.users[user_id]['listing_id']:
+        if not user_id:
+            result = random.choice(self.FULL_LIST)
+        elif self.users[user_id]['listing_id']:
             result = random.choice(self.users[user_id]['listing_id'])
             self.users[user_id]['listing_id'].remove(result)
         return (result)

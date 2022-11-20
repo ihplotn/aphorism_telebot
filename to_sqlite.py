@@ -58,4 +58,11 @@ def list_id_all(data_search=''):
     id_list = [_id[0] for _id in _list]
     return id_list
 
+def full_list_id():
+    query = f'''select id
+                from {table} a;'''
+    _list = execute_read_query(query)
+    id_list = [_id[0] for _id in _list]
+    return id_list
+
 
